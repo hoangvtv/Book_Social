@@ -37,7 +37,7 @@ public class UserService {
   }
 
   public User getUser(String userId) {
-    return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+    return userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
   }
 
   public User updateUser(String userId, UserUpdateRequest request) {
