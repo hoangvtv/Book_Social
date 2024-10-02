@@ -11,6 +11,8 @@ import com.phamtanhoang.identity_service.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +29,9 @@ public class UserService {
         throw new AppException(ErrorCode.USER_EXITSTED);
     }
     User user = userMapper.toUser(request);
+
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
 
     return userRepository.save(user);
   }
