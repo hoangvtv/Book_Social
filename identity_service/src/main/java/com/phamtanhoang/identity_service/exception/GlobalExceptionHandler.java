@@ -6,6 +6,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.io.EOFException;
+import java.text.ParseException;
 import java.util.Objects;
 
 @ControllerAdvice
@@ -45,6 +47,15 @@ public class GlobalExceptionHandler {
     ApiResponse<Void> apiResponse = new ApiResponse<>();
     apiResponse.setCode(errorCode.getCode());
     apiResponse.setMessage(errorCode.getMessage());
+
+    return ResponseEntity.badRequest().body(apiResponse);
+  }
+
+  @ExceptionHandler(ParseException.class)
+  ResponseEntity<ApiResponse<Void>> handlingEOFException(ParseException e) {
+    ApiResponse<Void> apiResponse = new ApiResponse<>();
+    apiResponse.setCode(ErrorCode.VERIFY_TOKEN_FAILED.getCode());
+    apiResponse.setMessage(ErrorCode.VERIFY_TOKEN_FAILED.getMessage());
 
     return ResponseEntity.badRequest().body(apiResponse);
   }
