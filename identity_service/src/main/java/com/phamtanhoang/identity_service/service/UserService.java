@@ -4,6 +4,7 @@ import com.phamtanhoang.identity_service.dto.request.UserCreationRequest;
 import com.phamtanhoang.identity_service.dto.request.UserUpdateRequest;
 import com.phamtanhoang.identity_service.dto.response.UserResponse;
 import com.phamtanhoang.identity_service.entity.User;
+import com.phamtanhoang.identity_service.enums.Role;
 import com.phamtanhoang.identity_service.exception.AppException;
 import com.phamtanhoang.identity_service.exception.ErrorCode;
 import com.phamtanhoang.identity_service.mapper.UserMapper;
@@ -11,37 +12,58 @@ import com.phamtanhoang.identity_service.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.
+    PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class UserService {
   UserRepository userRepository;
   UserMapper userMapper;
+  PasswordEncoder passwordEncoder;
 
-  public User createUser(UserCreationRequest request) {
-    if(userRepository.existsByUsername(request.getUsername())) {
-        throw new AppException(ErrorCode.USER_EXITSTED);
+  public UserResponse createUser(UserCreationRequest request) {
+    if (userRepository.existsByUsername(request.getUsername())) {
+      throw new AppException(ErrorCode.USER_EXITSTED);
     }
     User user = userMapper.toUser(request);
 
-    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
     user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-    return userRepository.save(user);
+    HashSet<String> roles = new HashSet<>();
+    roles.add(Role.USER.name());
+    user.setRoles(roles);
+
+    return userMapper.toUserResponse(userRepository.save(user));
   }
 
-  public List<User> getUsers() {
-    return userRepository.findAll();
+  @PreAuthorize("hasRole('ADMIN')")
+  public List<UserResponse> getUsers() {
+    log.info("In method getUsers");
+    return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
   }
 
+  @PostAuthorize("returnObject.username == authentication.name")
   public UserResponse getUser(String userId) {
+    log.info("In method getUser");
     return userMapper.toUserResponse(userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND)));
+  }
+
+  public UserResponse getMyInfo(){
+    var context = SecurityContextHolder.getContext();
+    var name = context.getAuthentication().getName();
+    var user = userRepository.findByUsername(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+    return userMapper.toUserResponse(user);
   }
 
   public UserResponse updateUser(String userId, UserUpdateRequest request) {
