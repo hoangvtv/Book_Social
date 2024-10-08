@@ -8,6 +8,7 @@ import com.phamtanhoang.identity_service.enums.Role;
 import com.phamtanhoang.identity_service.exception.AppException;
 import com.phamtanhoang.identity_service.exception.ErrorCode;
 import com.phamtanhoang.identity_service.mapper.UserMapper;
+import com.phamtanhoang.identity_service.repository.RoleRepository;
 import com.phamtanhoang.identity_service.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ import org.springframework.security.crypto.password.
     PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -29,6 +32,7 @@ import java.util.List;
 @Slf4j
 public class UserService {
   UserRepository userRepository;
+  RoleRepository roleRepository;
   UserMapper userMapper;
   PasswordEncoder passwordEncoder;
 
@@ -40,14 +44,15 @@ public class UserService {
 
     user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-    HashSet<String> roles = new HashSet<>();
-    roles.add(Role.USER.name());
-    user.setRoles(roles);
+    var roles = roleRepository.findAllById(List.of("USER"));
+    user.setRoles(new HashSet<>(roles));
 
     return userMapper.toUserResponse(userRepository.save(user));
   }
 
-  @PreAuthorize("hasRole('ADMIN')")
+//using hasRole with role, hasAuthority with permission
+//  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAuthority('APPROVE_POST')")
   public List<UserResponse> getUsers() {
     log.info("In method getUsers");
     return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
@@ -70,6 +75,10 @@ public class UserService {
     User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
 
     userMapper.updateUser(user, request);
+
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    var roles = roleRepository.findAllById(request.getRoles());
+    user.setRoles(new HashSet<>(roles));
 
     return userMapper.toUserResponse(userRepository.save(user));
   }

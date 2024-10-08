@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL) //when properties is null, it doesn't show in api response
 public class ApiResponse <T> {
+  @Builder.Default
   int code = 1000;
   String message;
   T result;
