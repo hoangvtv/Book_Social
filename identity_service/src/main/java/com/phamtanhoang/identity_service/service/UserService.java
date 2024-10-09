@@ -4,7 +4,6 @@ import com.phamtanhoang.identity_service.dto.request.UserCreationRequest;
 import com.phamtanhoang.identity_service.dto.request.UserUpdateRequest;
 import com.phamtanhoang.identity_service.dto.response.UserResponse;
 import com.phamtanhoang.identity_service.entity.User;
-import com.phamtanhoang.identity_service.enums.Role;
 import com.phamtanhoang.identity_service.exception.AppException;
 import com.phamtanhoang.identity_service.exception.ErrorCode;
 import com.phamtanhoang.identity_service.mapper.UserMapper;
@@ -17,12 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.
-    PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -51,8 +47,8 @@ public class UserService {
   }
 
 //using hasRole with role, hasAuthority with permission
-//  @PreAuthorize("hasRole('ADMIN')")
-  @PreAuthorize("hasAuthority('APPROVE_POST')")
+  @PreAuthorize("hasRole('ADMIN')")
+//  @PreAuthorize("hasAuthority('APPROVE_POST')")
   public List<UserResponse> getUsers() {
     log.info("In method getUsers");
     return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
