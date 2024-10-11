@@ -10,7 +10,9 @@ import com.phamtanhoang.identity_service.dto.request.IntrospectRequest;
 import com.phamtanhoang.identity_service.dto.request.InvalidatedTokenRequest;
 import com.phamtanhoang.identity_service.dto.response.AuthenticationResponse;
 import com.phamtanhoang.identity_service.dto.response.IntrospectResponse;
+import com.phamtanhoang.identity_service.dto.response.InvalidatedTokenResponse;
 import com.phamtanhoang.identity_service.entity.InvalidatedToken;
+import com.phamtanhoang.identity_service.entity.Permission;
 import com.phamtanhoang.identity_service.entity.User;
 import com.phamtanhoang.identity_service.exception.AppException;
 import com.phamtanhoang.identity_service.exception.ErrorCode;
@@ -81,7 +83,7 @@ public class AuthenticationService {
         .build();
   }
 
-  public void logout(InvalidatedTokenRequest token) throws ParseException, JOSEException {
+  public InvalidatedTokenResponse logout(InvalidatedTokenRequest token) throws ParseException, JOSEException {
     var signToken = verifyToken(token.getToken());
 
     String jit = signToken.getJWTClaimsSet().getJWTID();
@@ -93,6 +95,9 @@ public class AuthenticationService {
         .build();
 
     invalidatedTokenRepository.save(invalidatedToken);
+    return InvalidatedTokenResponse.builder()
+        .message("Logout successfully")
+        .build();
   }
 
   private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
@@ -147,9 +152,9 @@ public class AuthenticationService {
       user.getRoles().forEach(role -> {
         stringJoiner.add("ROLE_" + role.getName());
         if (!CollectionUtils.isEmpty(role.getPermissions())) {
-          role.getPermissions().forEach(permission -> {
+          for (Permission permission : role.getPermissions()) {
             stringJoiner.add(permission.getName());
-          });
+          }
         }
       });
     }

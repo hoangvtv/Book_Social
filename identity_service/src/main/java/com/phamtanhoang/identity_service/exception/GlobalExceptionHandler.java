@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -66,6 +67,17 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(ParseException.class)
   ResponseEntity<ApiResponse<Void>> handlingEOFException(ParseException e) {
+    ErrorCode errorCode = ErrorCode.VERIFY_TOKEN_FAILED;
+
+    ApiResponse<Void> apiResponse = new ApiResponse<>();
+    apiResponse.setCode(errorCode.getCode());
+    apiResponse.setMessage(errorCode.getMessage());
+
+    return ResponseEntity.status(errorCode.getHttpStatusCode()).body(apiResponse);
+  }
+
+  @ExceptionHandler(JwtException.class)
+  ResponseEntity<ApiResponse<Void>> handlingJwtException(JwtException e) {
     ErrorCode errorCode = ErrorCode.VERIFY_TOKEN_FAILED;
 
     ApiResponse<Void> apiResponse = new ApiResponse<>();

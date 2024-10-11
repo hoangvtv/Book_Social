@@ -8,6 +8,7 @@ import com.phamtanhoang.identity_service.dto.request.InvalidatedTokenRequest;
 import com.phamtanhoang.identity_service.dto.response.ApiResponse;
 import com.phamtanhoang.identity_service.dto.response.AuthenticationResponse;
 import com.phamtanhoang.identity_service.dto.response.IntrospectResponse;
+import com.phamtanhoang.identity_service.dto.response.InvalidatedTokenResponse;
 import com.phamtanhoang.identity_service.service.AuthenticationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -45,9 +46,10 @@ public class AuthenticationController {
   }
 
   @PostMapping("/logout")
-  ApiResponse<Void> logout(@RequestBody InvalidatedTokenRequest request) throws ParseException, JOSEException {
-    authenticationService.logout(request);
-    return ApiResponse.<Void>builder()
+  ApiResponse<InvalidatedTokenResponse> logout(@RequestBody InvalidatedTokenRequest request) throws ParseException, JOSEException {
+    var result = authenticationService.logout(request);
+    return ApiResponse.<InvalidatedTokenResponse>builder()
+        .message(result.getMessage())
         .build();
   }
 

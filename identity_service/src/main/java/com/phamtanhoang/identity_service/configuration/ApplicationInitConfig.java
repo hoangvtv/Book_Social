@@ -2,7 +2,6 @@ package com.phamtanhoang.identity_service.configuration;
 
 
 import com.phamtanhoang.identity_service.entity.User;
-import com.phamtanhoang.identity_service.enums.Role;
 import com.phamtanhoang.identity_service.repository.RoleRepository;
 import com.phamtanhoang.identity_service.repository.UserRepository;
 import lombok.AccessLevel;
