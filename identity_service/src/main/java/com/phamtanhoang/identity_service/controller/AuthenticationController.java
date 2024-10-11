@@ -4,6 +4,7 @@ package com.phamtanhoang.identity_service.controller;
 import com.nimbusds.jose.JOSEException;
 import com.phamtanhoang.identity_service.dto.request.AuthenticationRequest;
 import com.phamtanhoang.identity_service.dto.request.IntrospectRequest;
+import com.phamtanhoang.identity_service.dto.request.InvalidatedTokenRequest;
 import com.phamtanhoang.identity_service.dto.response.ApiResponse;
 import com.phamtanhoang.identity_service.dto.response.AuthenticationResponse;
 import com.phamtanhoang.identity_service.dto.response.IntrospectResponse;
@@ -42,4 +43,12 @@ public class AuthenticationController {
         .code(1000)
         .build();
   }
+
+  @PostMapping("/logout")
+  ApiResponse<Void> logout(@RequestBody InvalidatedTokenRequest request) throws ParseException, JOSEException {
+    authenticationService.logout(request);
+    return ApiResponse.<Void>builder()
+        .build();
+  }
+
 }
