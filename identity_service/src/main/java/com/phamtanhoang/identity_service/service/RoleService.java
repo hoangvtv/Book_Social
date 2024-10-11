@@ -2,7 +2,6 @@ package com.phamtanhoang.identity_service.service;
 
 
 import com.phamtanhoang.identity_service.dto.request.RoleRequest;
-import com.phamtanhoang.identity_service.dto.response.PermissionResponse;
 import com.phamtanhoang.identity_service.dto.response.RoleResponse;
 import com.phamtanhoang.identity_service.entity.Role;
 import com.phamtanhoang.identity_service.mapper.RoleMapper;

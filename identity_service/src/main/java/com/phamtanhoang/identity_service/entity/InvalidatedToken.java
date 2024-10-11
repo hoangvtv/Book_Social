@@ -4,7 +4,8 @@ package com.phamtanhoang.identity_service.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
+
+import java.util.Date;
 
 @Entity
 @Getter
@@ -12,9 +13,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class Permission {
+public class InvalidatedToken {
   @Id
-  String name;
-  String description;
+  String id;
+  Date expiryTime;
 }
