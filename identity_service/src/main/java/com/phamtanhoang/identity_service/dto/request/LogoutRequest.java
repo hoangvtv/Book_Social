@@ -1,4 +1,4 @@
-package com.phamtanhoang.identity_service.dto.response;
+package com.phamtanhoang.identity_service.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,6 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class InvalidatedTokenResponse {
-  String message;
+public class LogoutRequest {
+  String token;
 }
