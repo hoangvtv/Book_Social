@@ -4,11 +4,12 @@ package com.phamtanhoang.identity_service.controller;
 import com.nimbusds.jose.JOSEException;
 import com.phamtanhoang.identity_service.dto.request.AuthenticationRequest;
 import com.phamtanhoang.identity_service.dto.request.IntrospectRequest;
-import com.phamtanhoang.identity_service.dto.request.InvalidatedTokenRequest;
+import com.phamtanhoang.identity_service.dto.request.LogoutRequest;
+import com.phamtanhoang.identity_service.dto.request.RefreshRequest;
 import com.phamtanhoang.identity_service.dto.response.ApiResponse;
 import com.phamtanhoang.identity_service.dto.response.AuthenticationResponse;
 import com.phamtanhoang.identity_service.dto.response.IntrospectResponse;
-import com.phamtanhoang.identity_service.dto.response.InvalidatedTokenResponse;
+import com.phamtanhoang.identity_service.dto.response.LogoutResponse;
 import com.phamtanhoang.identity_service.service.AuthenticationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -46,10 +47,19 @@ public class AuthenticationController {
   }
 
   @PostMapping("/logout")
-  ApiResponse<InvalidatedTokenResponse> logout(@RequestBody InvalidatedTokenRequest request) throws ParseException, JOSEException {
+  ApiResponse<LogoutResponse> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
     var result = authenticationService.logout(request);
-    return ApiResponse.<InvalidatedTokenResponse>builder()
+    return ApiResponse.<LogoutResponse>builder()
         .message(result.getMessage())
+        .build();
+  }
+
+  @PostMapping("/refresh")
+  ApiResponse<AuthenticationResponse> refresh(@RequestBody RefreshRequest request) throws ParseException, JOSEException {
+    var result = authenticationService.refreshToken(request);
+    return ApiResponse.<AuthenticationResponse>builder()
+        .result(result)
+        .code(1000)
         .build();
   }
 
