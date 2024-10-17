@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -77,7 +79,7 @@ public class UserServiceTest {
     when(userRepository.save(any())).thenReturn(user);
 
     //When
-    var response = userService.createUser(request);
+    response = userService.createUser(request);
 
     //Then
     assertThat(response.getId()).isEqualTo("ca98b54-0352-445a-903d-576598848d5e");
@@ -96,6 +98,20 @@ public class UserServiceTest {
 
     //then
     assertThat(exception.getErrorCode().getCode()).isEqualTo(1002);
+  }
+
+  @Test
+  @WithMockUser(username = "hoang_test")
+  void getMyInfo_valid_success() {
+    when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+
+    //When
+    response = userService.getMyInfo();
+
+    assertThat(response.getUsername()).isEqualTo("hoang_test");
+    assertThat(response.getFirstName()).isEqualTo("Hoang");
+    assertThat(response.getLastName()).isEqualTo("Pham");
+    assertThat(response.getId()).isEqualTo("ca98b54-0352-445a-903d-576598848d5e");
   }
 
 }
