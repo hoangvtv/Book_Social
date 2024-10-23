@@ -24,7 +24,7 @@ import java.time.LocalDate;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource("/test.properties")
+//@TestPropertySource("/test.properties")
 public class UserControllerTest {
 
   @Autowired
