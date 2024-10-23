@@ -3,7 +3,6 @@ package com.phamtanhoang.identity_service.configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.phamtanhoang.identity_service.dto.response.ApiResponse;
 import com.phamtanhoang.identity_service.exception.ErrorCode;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
@@ -15,7 +14,7 @@ import java.io.IOException;
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
   @Override
   public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-      throws IOException, ServletException {
+      throws IOException {
     ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
 
     response.setStatus(errorCode.getHttpStatusCode().value());

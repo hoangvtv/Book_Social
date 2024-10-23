@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource("/test.properties")
+//@TestPropertySource("/test.properties")
 public class UserServiceTest {
 
   @Autowired
