@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,17 +34,22 @@ public class UserService {
   PasswordEncoder passwordEncoder;
 
   public UserResponse createUser(UserCreationRequest request) {
-    if (userRepository.existsByUsername(request.getUsername())) {
-      throw new AppException(ErrorCode.USER_EXITSTED);
-    }
+//    if (userRepository.existsByUsername(request.getUsername())) {
+//      throw new AppException(ErrorCode.USER_EXITSTED);
+//    }
     User user = userMapper.toUser(request);
 
     user.setPassword(passwordEncoder.encode(user.getPassword()));
 
     var roles = roleRepository.findAllById(List.of("USER"));
     user.setRoles(new HashSet<>(roles));
+    try {
+      user = userRepository.save(user);
+    } catch (DataIntegrityViolationException e) {
+      throw new AppException(ErrorCode.USER_EXITSTED);
+    }
 
-    return userMapper.toUserResponse(userRepository.save(user));
+    return userMapper.toUserResponse(user);
   }
 
 //using hasRole with role, hasAuthority with permission
