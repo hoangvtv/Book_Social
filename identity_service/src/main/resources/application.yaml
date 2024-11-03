@@ -7,9 +7,12 @@ spring:
   application:
     name: identity-service
   datasource:
-    url: "jdbc:mysql://localhost:3306/identity_service"
-    username: root
-    password: root
+#    url: "jdbc:mysql://localhost:3306/identity_service"
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/identity_service}
+#    username: root
+    username: ${DBMS_USER:root}
+#    password: root
+    password: ${DBMS_PASSWORD:root}
     driverClassName: "com.mysql.cj.jdbc.Driver"
   jpa:
     hibernate:
