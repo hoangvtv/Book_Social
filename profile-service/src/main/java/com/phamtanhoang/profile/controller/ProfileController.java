@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +36,8 @@ public class ProfileController {
 
     @GetMapping("/profiles")
     ApiResponse<List<ProfileResponse>> getAllProfiles() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info("Authentication: {}", authentication);
         return ApiResponse.<List<ProfileResponse>>builder()
                 .result(profileService.getAllProfiles())
                 .build();
