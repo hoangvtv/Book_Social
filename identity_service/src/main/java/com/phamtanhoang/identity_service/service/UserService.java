@@ -6,9 +6,11 @@ import com.phamtanhoang.identity_service.dto.response.UserResponse;
 import com.phamtanhoang.identity_service.entity.User;
 import com.phamtanhoang.identity_service.exception.AppException;
 import com.phamtanhoang.identity_service.exception.ErrorCode;
+import com.phamtanhoang.identity_service.mapper.ProfileMapper;
 import com.phamtanhoang.identity_service.mapper.UserMapper;
 import com.phamtanhoang.identity_service.repository.RoleRepository;
 import com.phamtanhoang.identity_service.repository.UserRepository;
+import com.phamtanhoang.identity_service.repository.httpclient.ProfileClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -32,11 +34,13 @@ public class UserService {
   RoleRepository roleRepository;
   UserMapper userMapper;
   PasswordEncoder passwordEncoder;
+  ProfileClient profileClient;
+  ProfileMapper profileMapper;
 
   public UserResponse createUser(UserCreationRequest request) {
-//    if (userRepository.existsByUsername(request.getUsername())) {
-//      throw new AppException(ErrorCode.USER_EXITSTED);
-//    }
+    if (userRepository.existsByUsername(request.getUsername())) {
+      throw new AppException(ErrorCode.USER_EXITSTED);
+    }
     User user = userMapper.toUser(request);
 
     user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -45,6 +49,12 @@ public class UserService {
     user.setRoles(new HashSet<>(roles));
     try {
       user = userRepository.save(user);
+
+      var profileRequest = profileMapper.toProfileCreationRequest(request);
+      profileRequest.setUserId(user.getId());
+
+      var profileResponse = profileClient.createProfile(profileRequest);
+      log.info("profileResponse {}", profileResponse);
     } catch (DataIntegrityViolationException e) {
       throw new AppException(ErrorCode.USER_EXITSTED);
     }
