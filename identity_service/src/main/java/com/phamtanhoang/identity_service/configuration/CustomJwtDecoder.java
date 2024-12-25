@@ -2,6 +2,7 @@ package com.phamtanhoang.identity_service.configuration;
 
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jwt.SignedJWT;
 import com.phamtanhoang.identity_service.dto.request.IntrospectRequest;
 import com.phamtanhoang.identity_service.exception.ErrorCode;
 import com.phamtanhoang.identity_service.service.AuthenticationService;
@@ -37,26 +38,40 @@ public class CustomJwtDecoder implements JwtDecoder {
 
   @Override
   public Jwt decode(String token) throws JwtException {
-    try {
-      var response = authenticationService.introspect(IntrospectRequest.builder()
-              .token(token)
-              .build());
-      if (!response.isValid()) {
-        throw new JwtException(ErrorCode.VERIFY_TOKEN_FAILED.getMessage());
-      }
-    } catch (JOSEException | ParseException e) {
-      log.error(e.getMessage());
-      throw new JwtException(e.getMessage());
-    }
+// DUPLICATE CHECK AUTHENTICATION IN API-GATEWAY SERVICE
+//    try {
+//      var response = authenticationService.introspect(IntrospectRequest.builder()
+//              .token(token)
+//              .build());
+//      if (!response.isValid()) {
+//        throw new JwtException(ErrorCode.VERIFY_TOKEN_FAILED.getMessage());
+//      }
+//    } catch (JOSEException | ParseException e) {
+//      log.error(e.getMessage());
+//      throw new JwtException(e.getMessage());
+//    }
+//
+//    if (Objects.isNull(nimbusJwtDecoder)) {
+//      SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
+//      nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
+//          .macAlgorithm(MacAlgorithm.HS512)
+//          .build();
+//    }
+//    log.info(nimbusJwtDecoder.toString());
+//    return nimbusJwtDecoder.decode(token);
 
-    if (Objects.isNull(nimbusJwtDecoder)) {
-      SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
-      nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
-          .macAlgorithm(MacAlgorithm.HS512)
-          .build();
+    try {
+      SignedJWT signedJWT = SignedJWT.parse(token);
+
+      return new Jwt(token,
+          signedJWT.getJWTClaimsSet().getIssueTime().toInstant(),
+          signedJWT.getJWTClaimsSet().getExpirationTime().toInstant(),
+          signedJWT.getHeader().toJSONObject(),
+          signedJWT.getJWTClaimsSet().getClaims()
+          );
+    } catch (ParseException e) {
+      throw new JwtException("Invalid JWT");
     }
-    log.info(nimbusJwtDecoder.toString());
-    return nimbusJwtDecoder.decode(token);
   }
 }
 
