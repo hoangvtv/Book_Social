@@ -27,4 +27,4 @@ spring:
           predicates:
             - Path=${app.api-prefix}/notification/**
           filters:
-            - StringPrefix=2
+            - StripPrefix=2
