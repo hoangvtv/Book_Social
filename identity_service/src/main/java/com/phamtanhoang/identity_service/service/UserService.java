@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,6 +40,7 @@ public class UserService {
   PasswordEncoder passwordEncoder;
   ProfileClient profileClient;
   ProfileMapper profileMapper;
+  KafkaTemplate<String, String> kafkaTemplate;
 
   public UserResponse createUser(UserCreationRequest request) {
     if (userRepository.existsByUsername(request.getUsername())) {
@@ -64,6 +66,9 @@ public class UserService {
 //      log.info("authHeader: {}", authHeader);
       var profileResponse = profileClient.createProfile(profileRequest);
       log.info("profileResponse {}", profileResponse);
+
+      //publish message to KAFKA
+      kafkaTemplate.send("onboard-successful","Welcome out new member" + user.getUsername());
     } catch (DataIntegrityViolationException e) {
       throw new AppException(ErrorCode.USER_EXITSTED);
     }
