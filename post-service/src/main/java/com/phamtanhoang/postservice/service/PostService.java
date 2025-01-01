@@ -3,9 +3,12 @@ package com.phamtanhoang.postservice.service;
 import com.phamtanhoang.postservice.dto.PageResponse;
 import com.phamtanhoang.postservice.dto.request.PostRequest;
 import com.phamtanhoang.postservice.dto.response.PostResponse;
+import com.phamtanhoang.postservice.dto.response.UserProfileResponse;
 import com.phamtanhoang.postservice.entity.Post;
 import com.phamtanhoang.postservice.mapper.PostMapper;
 import com.phamtanhoang.postservice.repository.PostRepository;
+import com.phamtanhoang.postservice.repository.httpclient.ProfileClient;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,6 +31,7 @@ public class PostService {
   PostRepository postRepository;
   PostMapper postMapper;
   DateTimeFormatter dateTimeFormatter;
+  ProfileClient profileClient;
 
   public PostResponse createPost(PostRequest request) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -46,13 +50,23 @@ public class PostService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String userId = authentication.getName();
 
+    UserProfileResponse userProfile = null;
+    try {
+      userProfile = profileClient.getUser(userId).getResult();
+    } catch (FeignException e) {
+      log.error("Error while fetching user profile", e);
+    }
     Sort sort = Sort.by( "createdDate").descending();
     Pageable pageable = PageRequest.of(page -1, size, sort);
     var pageData = postRepository.findAllByUserId(userId, pageable);
 
+    log.info("userPofile {}", userProfile);
+
+    String username = userProfile != null ? userProfile.getUsername() : null;
     var postList = pageData.getContent().stream().map(post -> {
       var postResponse = postMapper.toPostResponse(post);
       postResponse.setCreatedAt(dateTimeFormatter.formatDate(post.getCreatedDate()));
+      postResponse.setUsername(username);
       return postResponse;
     }).toList();
 

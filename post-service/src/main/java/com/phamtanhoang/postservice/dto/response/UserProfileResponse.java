@@ -1,17 +1,17 @@
-package com.phamtanhoang.profile_service.dto.request;
-
-import java.time.LocalDate;
+package com.phamtanhoang.postservice.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDate;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProfileCreationRequest {
-  String userId;
+public class UserProfileResponse {
+  String id;
   String username;
   String firstName;
   String lastName;

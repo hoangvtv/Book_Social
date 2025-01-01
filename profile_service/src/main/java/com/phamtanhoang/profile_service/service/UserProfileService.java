@@ -4,6 +4,8 @@ package com.phamtanhoang.profile_service.service;
 import com.phamtanhoang.profile_service.dto.request.ProfileCreationRequest;
 import com.phamtanhoang.profile_service.dto.response.UserProfileResponse;
 import com.phamtanhoang.profile_service.entity.UserProfile;
+import com.phamtanhoang.profile_service.exception.AppException;
+import com.phamtanhoang.profile_service.exception.ErrorCode;
 import com.phamtanhoang.profile_service.mapper.UserProfileMapper;
 import com.phamtanhoang.profile_service.repository.UserProfileRepository;
 import lombok.AccessLevel;
@@ -32,7 +34,16 @@ public class UserProfileService {
 
   public UserProfileResponse getProfile(String id) {
     UserProfile userProfile =
-        userProfileRepository.findById(id).orElseThrow(() -> new RuntimeException("Profile not found"));
+        userProfileRepository.findById(id).orElseThrow(() ->
+            new AppException(ErrorCode.USER_NOT_EXISTED));
+
+    return userProfileMapper.toUserProfileResponse(userProfile);
+  }
+
+  public UserProfileResponse getProfileByUserId(String userId) {
+    UserProfile userProfile = userProfileRepository
+        .findByUserId(userId)
+        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
     return userProfileMapper.toUserProfileResponse(userProfile);
   }
