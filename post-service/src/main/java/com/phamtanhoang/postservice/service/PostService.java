@@ -1,5 +1,6 @@
 package com.phamtanhoang.postservice.service;
 
+import com.phamtanhoang.postservice.dto.PageResponse;
 import com.phamtanhoang.postservice.dto.request.PostRequest;
 import com.phamtanhoang.postservice.dto.response.PostResponse;
 import com.phamtanhoang.postservice.entity.Post;
@@ -9,12 +10,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -38,13 +41,21 @@ public class PostService {
     return postMapper.toPostResponse(postRepository.save(post));
   }
 
-  public List<PostResponse> getMyPosts(){
+  public PageResponse<PostResponse> getMyPosts(int page, int size){
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String userId = authentication.getName();
 
-    return postRepository.findAllByUserId(userId)
-        .stream()
-        .map(postMapper::toPostResponse)
-        .toList();
+    Sort sort = Sort.by( "createdDate").descending();
+    Pageable pageable = PageRequest.of(page -1, size, sort);
+
+    var pageData = postRepository.findAllByUserId(userId, pageable);
+
+    return PageResponse.<PostResponse>builder()
+        .currentPage(page)
+        .pageSize(pageData.getSize())
+        .totalPages(pageData.getTotalPages())
+        .totalElements(pageData.getTotalElements())
+        .data(pageData.getContent().stream().map(postMapper::toPostResponse).toList())
+        .build();
   }
 }
