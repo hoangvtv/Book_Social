@@ -1,6 +1,7 @@
 package com.phamtanhoang.profile_service.controller;
 
 
+import com.phamtanhoang.profile_service.dto.ApiResponse;
 import com.phamtanhoang.profile_service.dto.request.ProfileCreationRequest;
 import com.phamtanhoang.profile_service.dto.response.UserProfileResponse;
 import com.phamtanhoang.profile_service.service.UserProfileService;
@@ -19,6 +20,13 @@ public class InternalUserProfileController {
   @PostMapping
   UserProfileResponse createProfile(@RequestBody ProfileCreationRequest request) {
     return userProfileService.createProfile(request);
+  }
+
+  @GetMapping("/{userId}")
+  ApiResponse<UserProfileResponse> getProfile(@PathVariable String userId) {
+    return ApiResponse.<UserProfileResponse>builder()
+        .result(userProfileService.getProfileByUserId(userId))
+        .build();
   }
 
 }
