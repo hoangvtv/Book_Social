@@ -1,5 +1,6 @@
 package com.phamtanhoang.identity_service.service;
 
+import com.phamtanhoang.event.dto.NotificationEvent;
 import com.phamtanhoang.identity_service.dto.request.UserCreationRequest;
 import com.phamtanhoang.identity_service.dto.request.UserUpdateRequest;
 import com.phamtanhoang.identity_service.dto.response.UserResponse;
@@ -22,12 +23,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +38,7 @@ public class UserService {
   PasswordEncoder passwordEncoder;
   ProfileClient profileClient;
   ProfileMapper profileMapper;
-  KafkaTemplate<String, String> kafkaTemplate;
+  KafkaTemplate<String, Object> kafkaTemplate;
 
   public UserResponse createUser(UserCreationRequest request) {
     if (userRepository.existsByUsername(request.getUsername())) {
@@ -68,7 +66,13 @@ public class UserService {
       log.info("profileResponse {}", profileResponse);
 
       //publish message to KAFKA
-      kafkaTemplate.send("onboard-successful","Welcome out new member" + user.getUsername());
+      NotificationEvent notificationEvent = NotificationEvent.builder()
+          .channel("EMAIL")
+          .recipient(request.getEmail())
+          .subject("Welcome to Book Social")
+          .body("Hello " + request.getUsername() + "!")
+          .build();
+      kafkaTemplate.send("notification-delivery",notificationEvent);
     } catch (DataIntegrityViolationException e) {
       throw new AppException(ErrorCode.USER_EXITSTED);
     }

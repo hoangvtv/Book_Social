@@ -168,7 +168,7 @@ public class AuthenticationService {
 
     // build payload with claim
     JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-        .subject(user.getUsername()) //represent user login
+        .subject(user.getId()) //represent user login
         .issuer("phamtanhoang.com") //Identify who issued the token
         .issueTime(new Date())
         .expirationTime(new Date(
