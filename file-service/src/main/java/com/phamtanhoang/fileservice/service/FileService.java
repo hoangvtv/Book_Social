@@ -1,33 +1,39 @@
 package com.phamtanhoang.fileservice.service;
 
+import com.phamtanhoang.fileservice.dto.response.FileResponse;
+import com.phamtanhoang.fileservice.mapper.FileMgmtMapper;
+import com.phamtanhoang.fileservice.repository.FileMgmtRepository;
+import com.phamtanhoang.fileservice.repository.FileRepository;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Objects;
-import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FileService {
+  FileRepository fileRepository;
+  FileMgmtRepository fileMgmtRepository;
+  FileMgmtMapper fileMgmtMapper;
 
-  public Object uploadFile(MultipartFile file) throws IOException {
+  public FileResponse uploadFile(MultipartFile file) throws IOException {
+    var fileInfo = fileRepository.store(file);
 
-    Path folder = Paths.get("D:/JAVA/upload");
-    String fileExtension =  StringUtils.getFilenameExtension(file.getOriginalFilename());
+    var fileMgmt = fileMgmtMapper.toFileMgmt(fileInfo);
 
-    String fileName = Objects.isNull(fileExtension)
-        ? UUID.randomUUID().toString()
-        : (UUID.randomUUID() + "." + fileExtension);
+    String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+    fileMgmt.setOwnerId(userId);
 
-    Path filePath = folder.resolve(fileName).normalize().toAbsolutePath();
+    fileMgmt =  fileMgmtRepository.save(fileMgmt);
 
-    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-    return null;
+    return FileResponse.builder()
+        .url(fileInfo.getUrl())
+        .originalFilename(file.getOriginalFilename())
+        .build();
   }
 }
